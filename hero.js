@@ -146,16 +146,19 @@ var move = function(gameData, helpers) {
 
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
     if (tile.type === 'Unoccupied' && tile.subType === 'Bones') {
-      console.log('bones move');
+      //console.log('bones move');
       return true;
     }
   });
-  nearest.tp = 'bones';
-  variants.push(nearest);  
+  if (nearest !== false && !helpers.AreThereEnemiesAround(gameData, nearest.coords[0], nearest.coords[1]) || myHero.health > 30)
+  {
+    nearest.tp = 'bones';
+    variants.push(nearest);
+  }
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
     if (tile.type === 'DiamondMine' && (!tile.owner || tile.owner.id != myHero.id) && myHero.health>20) {
-      console.log('diamond move');
+      //console.log('diamond move');
       return true;
     }
   });
@@ -164,7 +167,7 @@ var move = function(gameData, helpers) {
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
     if (tile.type === 'Hero' && tile.team !== myHero.team && myHero.health>20) {
-      console.log('enemy move');
+      //console.log('enemy move');
       return true;
     }
   });
@@ -173,7 +176,7 @@ var move = function(gameData, helpers) {
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
     if (tile.type === 'HealthWell' && myHero.health<100) {
-      console.log('health move');
+      //console.log('health move');
       return true;
     }
   });
@@ -182,7 +185,7 @@ var move = function(gameData, helpers) {
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
     if (tile.type === 'Hero' && tile.team === myHero.team) {
-      console.log('friend move');
+      //console.log('friend move');
       return true;
     }
   });
@@ -190,17 +193,40 @@ var move = function(gameData, helpers) {
   variants.push(nearest);
   
   var min;
-  var min_distance = 1000;
-  for (var i in variants)
+  var min_distance;
+  while (variants.length > 0)
   {
-    if (variants[i].distance < min_distance) {
-      min = i;
-      min_distance = variants[i].distance;
+    min_distance = 1000;
+    for (var i in variants)
+    {
+      if (variants[i] == null) continue;
+      if (variants[i].distance < min_distance) {
+        min = i;
+        min_distance = variants[i].distance;
+      }
     }
-  }
-  if (variants[min] !== undefined) {
-    console.log(variants.length + ''+min+' select '+variants[min].tp+'. Distance '+variants[min].distance);
-    return variants[min].direction;
+    if (variants[min] !== undefined)
+    {
+      //console.log('select '+variants[min].tp+'. Distance '+variants[min].distance+ '. Coords: '+variants[min].coords[0]+'x'+variants[min].coords[1]);
+      switch (variants[min].direction)
+      {
+        case 'North':
+          if (helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop-1, myHero.distanceFromLeft) && !helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop, myHero.distanceFromLeft) && myHero.health <= 30) variants[min] = null;
+          break;
+        case 'East':
+          if (helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop, myHero.distanceFromLeft+1) && !helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop, myHero.distanceFromLeft) && myHero.health <= 30) variants[min] = null;
+          break;
+        case 'South':
+          if (helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop+1, myHero.distanceFromLeft) && !helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop-1, myHero.distanceFromLeft) && myHero.health <= 30) variants[min] = null;
+          break;
+        case 'West':
+          if (helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop, myHero.distanceFromLeft-1) && !helpers.AreThereEnemiesAround(gameData, myHero.distanceFromTop-1, myHero.distanceFromLeft) && myHero.health <= 30) variants[min] = null;
+          break;
+      }
+
+      
+      if (variants[min] != null) return variants[min].direction;
+    }
   }
   
 };

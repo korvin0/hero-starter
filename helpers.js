@@ -246,4 +246,26 @@ helpers.findNearestTeamMember = function(gameData) {
   return pathInfoObject.direction;
 };
 
+helpers.AreThereEnemiesAround = function(gameData, fromtop, fromleft) {
+  var myHero = gameData.activeHero;
+  var board = gameData.board;
+
+  var neighbours = [
+    helpers.getTileNearby(gameData.board, fromtop, fromleft, 'North'),
+    helpers.getTileNearby(gameData.board, fromtop, fromleft, 'East'),
+    helpers.getTileNearby(gameData.board, fromtop, fromleft, 'South'),
+    helpers.getTileNearby(gameData.board, fromtop, fromleft, 'West')
+  ];
+  
+  for (var n in neighbours)
+  {
+    if (neighbours[n] !== false && neighbours[n].type === 'Hero' && neighbours[n].team !== myHero.team)
+    {
+      return true;
+    }
+  }
+  return false;
+  
+};
+
 module.exports = helpers;
