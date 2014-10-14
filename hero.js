@@ -80,30 +80,30 @@
 // };
 
 // // The "Safe Diamond Miner"
-var move = function(gameData, helpers) {
-  var myHero = gameData.activeHero;
+//var move = function(gameData, helpers) {
+  //var myHero = gameData.activeHero;
 
-  //Get stats on the nearest health well
-  var healthWellStats = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(boardTile) {
-    if (boardTile.type === 'HealthWell') {
-      return true;
-    }
-  });
-  var distanceToHealthWell = healthWellStats.distance;
-  var directionToHealthWell = healthWellStats.direction;
+  ////Get stats on the nearest health well
+  //var healthWellStats = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(boardTile) {
+    //if (boardTile.type === 'HealthWell') {
+      //return true;
+    //}
+  //});
+  //var distanceToHealthWell = healthWellStats.distance;
+  //var directionToHealthWell = healthWellStats.direction;
   
 
-  if (myHero.health < 40) {
-    //Heal no matter what if low health
-    return directionToHealthWell;
-  } else if (myHero.health < 100 && distanceToHealthWell === 1) {
-    //Heal if you aren't full health and are close to a health well already
-    return directionToHealthWell;
-  } else {
-    //If healthy, go capture a diamond mine!
-    return helpers.findNearestNonTeamDiamondMine(gameData);
-  }
-};
+  //if (myHero.health < 40) {
+    ////Heal no matter what if low health
+    //return directionToHealthWell;
+  //} else if (myHero.health < 100 && distanceToHealthWell === 1) {
+    ////Heal if you aren't full health and are close to a health well already
+    //return directionToHealthWell;
+  //} else {
+    ////If healthy, go capture a diamond mine!
+    //return helpers.findNearestNonTeamDiamondMine(gameData);
+  //}
+//};
 
 // // The "Selfish Diamond Miner"
 // // This hero will attempt to capture diamond mines (even those owned by teammates).
@@ -137,6 +137,73 @@ var move = function(gameData, helpers) {
 // var move = function(gameData, helpers) {
 //   return helpers.findNearestHealthWell(gameData);
 // }
+
+// The korvin0 hero
+var move = function(gameData, helpers) {
+  var myHero = gameData.activeHero;
+  var nearest;
+  var variants = [];
+
+  nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
+    if (tile.type === 'Unoccupied' && tile.subType === 'Bones') {
+      console.log('bones move');
+      return true;
+    }
+  });
+  nearest.tp = 'bones';
+  variants.push(nearest);  
+  
+  nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
+    if (tile.type === 'DiamondMine' && (!tile.owner || tile.owner.id != myHero.id) && myHero.health>20) {
+      console.log('diamond move');
+      return true;
+    }
+  });
+  nearest.tp = 'diamond';
+  variants.push(nearest);
+  
+  nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
+    if (tile.type === 'Hero' && tile.team !== myHero.team && myHero.health>20) {
+      console.log('enemy move');
+      return true;
+    }
+  });
+  nearest.tp = 'enemy';
+  variants.push(nearest);
+  
+  nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
+    if (tile.type === 'HealthWell' && myHero.health<100) {
+      console.log('health move');
+      return true;
+    }
+  });
+  nearest.tp = 'health';
+  variants.push(nearest);
+  
+  nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
+    if (tile.type === 'Hero' && tile.team === myHero.team) {
+      console.log('friend move');
+      return true;
+    }
+  });
+  nearest.tp = 'friend';
+  variants.push(nearest);
+  
+  var min;
+  var min_distance = 1000;
+  for (var i in variants)
+  {
+    if (variants[i].distance < min_distance) {
+      min = i;
+      min_distance = variants[i].distance;
+    }
+  }
+  if (variants[min] !== undefined) {
+    console.log(variants.length + ''+min+' select '+variants[min].tp+'. Distance '+variants[min].distance);
+    return variants[min].direction;
+  }
+  
+};
 
 
 // Export the move function here
