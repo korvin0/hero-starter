@@ -184,7 +184,7 @@ var move = function(gameData, helpers) {
   variants.push(nearest);
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
-    if (tile.type === 'Hero' && tile.team === myHero.team) {
+    if (tile.type === 'Hero' && tile.team === myHero.team && tile.health<100) {
       //console.log('friend move');
       return true;
     }
