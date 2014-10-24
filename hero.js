@@ -157,12 +157,12 @@ var move = function(gameData, helpers) {
   }
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
-    if (tile.type === 'DiamondMine' && (!tile.owner || tile.owner.id != myHero.id) && myHero.health>20) {
-      //console.log('diamond move');
+    if (tile.type === 'HealthWell' && myHero.health<100) {
+      //console.log('health move');
       return true;
     }
   });
-  nearest.tp = 'diamond';
+  nearest.tp = 'health';
   variants.push(nearest);
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
@@ -175,12 +175,12 @@ var move = function(gameData, helpers) {
   variants.push(nearest);
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
-    if (tile.type === 'HealthWell' && myHero.health<100) {
-      //console.log('health move');
+    if (tile.type === 'DiamondMine' && (!tile.owner || tile.owner.id != myHero.id) && myHero.health>20) {
+      //console.log('diamond move');
       return true;
     }
   });
-  nearest.tp = 'health';
+  nearest.tp = 'diamond';
   variants.push(nearest);
   
   nearest = helpers.findNearestObjectDirectionAndDistance(gameData.board, myHero, function(tile) {
